@@ -3,7 +3,6 @@ import time
 import cv2
 import imutils
 import shutil
-import img2pdf
 import glob
 import argparse
 
@@ -16,8 +15,8 @@ WARMUP = FRAME_RATE              # initial number of frames to be skipped
 FGBG_HISTORY = FRAME_RATE * 15   # no.of frames in background object
 VAR_THRESHOLD = 16               # Threshold on the squared Mahalanobis distance between the pixel and the model to decide whether a pixel is well described by the background model.
 DETECT_SHADOWS = False            # If true, the algorithm will detect shadows and mark them.
-MIN_PERCENT = 0.1                # min % of diff between foreground and background to detect if motion has stopped
-MAX_PERCENT = 3                  # max % of diff between foreground and background to detect if frame is still in motion
+MIN_PERCENT = 0.01                # min % of diff between foreground and background to detect if motion has stopped
+MAX_PERCENT = 0.1                  # max % of diff between foreground and background to detect if frame is still in motion
 
 
 def get_frames(video_path):
@@ -89,6 +88,7 @@ def detect_unique_screenshots(video_path, output_folder_screenshot_path):
 
         # if p_diff less than N% then motion has stopped, thus capture the frame
 
+        print(captured, round(frame_time/60, 2), p_diff)
         if p_diff < MIN_PERCENT and not captured and frame_count > WARMUP:
             captured = True
             filename = f"{screenshoots_count:03}_{round(frame_time/60, 2)}.png"
@@ -121,6 +121,10 @@ def initialize_output_folder(video_path):
 
 
 def convert_screenshots_to_pdf(output_folder_screenshot_path):
+
+    # Import it here, so the code can run without qpdf installed.
+    import img2pdf
+    
     output_pdf_path = f"{OUTPUT_SLIDES_DIR}/{video_path.rsplit('/')[-1].split('.')[0]}" + '.pdf'
     print('output_folder_screenshot_path', output_folder_screenshot_path)
     print('output_pdf_path', output_pdf_path)
